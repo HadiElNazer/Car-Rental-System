@@ -5,8 +5,12 @@ import categoryRouter from './routes/category.js';
 import brandRouter from './routes/brand.js';
 import carRouter from './routes/car.js';
 import rentalRouter from './routes/rental.js';
+import userRouter from './routes/user.js';
+import dotenv from 'dotenv';
+
 
 const app = express();
+
 const { json } = pkg;
 
 app.use(json());
@@ -21,11 +25,11 @@ app.use((req, res, next) => {
 });
 
 
-app.use(brandRouter);
-app.use(categoryRouter);
-app.use(carRouter);
-app.use(rentalRouter);
-
+app.use('/brand',brandRouter);
+app.use('/category',categoryRouter);
+app.use('/car',carRouter);
+app.use('/rental',rentalRouter);
+app.use('/user',userRouter);
 
 app.use((error, req, res, next) => {
   const status = error.statusCode || 500;
@@ -34,17 +38,18 @@ app.use((error, req, res, next) => {
   res.status(status).json({ message, data });
 });
 
+dotenv.config();
+let host = process.env.HOST;
 
+try {
+  await mongoose.connect(host , { useNewUrlParser: true, useUnifiedTopology: true }, );
+  console.log("DB Start !!!")
+  app.listen(8080);
 
-mongoose.connect(
-  'mongodb+srv://hadi:42343562937@cluster0.b7ddr.mongodb.net/testing?retryWrites=true&w=majority',
-  { useNewUrlParser: true, useUnifiedTopology: true },
-)
-  .then(() => {
-    console.log("DB Start !!!")
-    app.listen(8080);
-  })
-  .catch((err) => { console.log(err); console.log("hadi") }); //eslint-disable-line*/
+} catch (error) {
+  
+  console.log(error);
+}
 
 
 

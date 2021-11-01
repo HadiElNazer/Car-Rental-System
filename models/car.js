@@ -21,13 +21,13 @@ const carsSchema = new Schema({
         type: String,
         required: true
     },
-    brand: {
+    BRAND: {
         type: Schema.Types.ObjectId,
         required: true,
         ref: 'Brand',
 
     },
-    category: {
+    CATEGORY: {
         type: Schema.Types.ObjectId,
         required: true,
         ref: 'Category',

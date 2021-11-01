@@ -1,38 +1,17 @@
 import express from 'express';
-import { body } from 'express-validator';
 import * as categoryController from '../controllers/category.js';
 
 
 const router = express.Router();
 
-router.put('/addCategory',
-    [
-        body('name').
-            trim().
-            not().
-            isEmpty(),
-        body('description').
-            trim().
-            not().
-            isEmpty()
-    ], categoryController.addCategory
+router.post('/', categoryController.addCategory);
 
-);
-router.get('/updateCategory/:categoryId',
-    [
-        body('name').
-            trim().
-            not().
-            isEmpty(),
-        body('description').
-            trim().
-            not().
-            isEmpty()
-    ], categoryController.updateCategory
+router.put('/:categoryId', categoryController.updateCategory);
 
-);
-router.get('/deleteCategory/:categoryId', categoryController.deleteCategory);
-router.get('/findCategory/:categoryId', categoryController.findCategory);
+router.delete('/:categoryId', categoryController.deleteCategory);
+
+router.get('/', categoryController.findCategory);
+
 router.get('/findAll', categoryController.findAllCategory);
 
 export default router;

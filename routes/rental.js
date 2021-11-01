@@ -4,7 +4,7 @@ import * as rentalController from '../controllers/rental.js';
 
 const router = express.Router();
 
-router.get('/addRental/:carId', [
+router.post('/', [
     body('userFirstName').
         trim().
         not().

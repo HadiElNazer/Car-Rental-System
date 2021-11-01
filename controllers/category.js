@@ -1,25 +1,16 @@
-import { validationResult } from 'express-validator';
-import Category from '../models/category.js'; //eslint-disable-line
-import Car from '../models/car.js';
+import instance from '../services/category.js';
+
 
 export async function addCategory(req, res, next) {
-  const errors = validationResult(req);
   try {
-    if (!errors.isEmpty()) {
-      const error = new Error('Validation failed.');
-      error.statusCode = 422;
-      error.data = errors.array();
-      throw error;
-    }
-    const { name } = req.body;
-    const { description } = req.body;
-    const category = new Category({
-      name,
-      description,
-    });
-    const result = await category.save();
-    res.status(201).json({ message: 'Category created!', result }); //eslint-disable-line
+
+    const result = await instance.addCategory(req, res, next);
+    res.status(201).send({ message: 'Category created!', result });
+
   } catch (err) {
+    if (err.isJoi === true) {
+      err.statusCode = 422;
+    }
     if (!err.statusCode) {
       err.statusCode = 500;
     }
@@ -28,31 +19,16 @@ export async function addCategory(req, res, next) {
 }
 
 export async function updateCategory(req, res, next) {
-  const errors = validationResult(req);
   try {
-    if (!errors.isEmpty()) {
-      const error = new Error('Validation failed.');
-      error.statusCode = 422;
-      error.data = errors.array();
-      throw error;
-    }
-    const { categoryId } = req.params;
 
-    const { name } = req.body;
-    const { description } = req.body;
-    const category = await Category.findById(categoryId);
+    await instance.updateCategory(req, res, next);
+    res.status(201).send({ message: 'category updated!' });
 
-    if (!category) {
-      const error = new Error('Could not find categpry.');
-      error.statusCode = 404;
-      throw error;
-    }
-
-    category.name = name;
-    category.description = description;
-    const result = await category.save();
-    res.status(201).json({ message: 'category updated!', result }); //eslint-disable-line
   } catch (err) {
+
+    if (err.isJoi === true) {
+      err.statusCode = 422;
+    }
     if (!err.statusCode) {
       err.statusCode = 500;
     }
@@ -63,29 +39,8 @@ export async function updateCategory(req, res, next) {
 export async function deleteCategory(req, res, next) {
 
   try {
-    const { categoryId } = req.params;
-
-    const category = await Category.findById(categoryId);
-    console.log(category);
-
-    if (!category) {
-      const error = new Error('Could not find category.');
-      error.statusCode = 404;
-      throw error;
-    }
-
-    const car = await Car.findOne({ category: categoryId });
-    console.log(car);
-    if (!car) {
-
-      const category = await Category.deleteOne({ _id: categoryId });
-      res.status(200).json({ message: 'category deleted.', category });
-    } else {
-      const error = new Error('Could not delete category  relation car .');
-      error.statusCode = 404;
-      throw error;
-
-    }
+    await instance.deleteCategory(req, res, next);
+    res.status(200).send({ message: 'category deleted.' });
   }
   catch (err) {
     if (!err.statusCode) {
@@ -98,17 +53,9 @@ export async function deleteCategory(req, res, next) {
 
 export async function findCategory(req, res, next) {
   try {
+    const category = await instance.findCategory(req, res, next)
+    res.status(201).send({ category });
 
-    const { categoryId } = req.params;
-    const category = await Category.findById(categoryId);
-
-    if (!category) {
-      const error = new Error('Could not find category.');
-      error.statusCode = 404;
-      throw error;
-    }
-
-    res.status(201).json({ category }); //eslint-disable-line
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
@@ -123,12 +70,9 @@ export async function findAllCategory(req, res, next) {
 
   try {
 
-    const categorys = await Category.find();
-    if (categorys.length === 0) {
-      res.status(200).json({ message: 'any categories' });
-    } else {
-      res.status(200).json({ message: 'category fetched.', categorys });
-    }
+    const categorys = await instance.findAll(req, res, next);
+    res.status(200).send({ categorys });
+
   }
   catch (err) {
     if (!err.statusCode) {
