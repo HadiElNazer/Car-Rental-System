@@ -1,30 +1,25 @@
 import jwt from 'jsonwebtoken';
+import config from '../config.js'
 
 export default (req, res, next) => {
-  try{
+  try {
     const authHeader = req.get('Authorization');
     if (!authHeader) {
       const error = new Error('Not authenticated.');
-      error.statusCode = 401;
       throw error;
     }
     const token = authHeader;
     let decodedToken;
-    try {
-      decodedToken = jwt.verify(token, 'somesupersecretsecret');
-    } catch (err) {
-      err.statusCode = 500;
-      throw err;
-    }
+    decodedToken = jwt.verify(token,config.secret );
     if (!decodedToken) {
       const error = new Error('Not authenticated.');
-      error.statusCode = 401;
       throw error;
     }
     req.userId = decodedToken.userId;
     next();
-  } catch(e) {
+  } catch (e) {
+    e.statusCode = 401;
     next(e);
-  } 
+  }
 
 };

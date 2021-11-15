@@ -1,18 +1,22 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import pkg from 'body-parser';
-import categoryRouter from './routes/category.js';
-import brandRouter from './routes/brand.js';
-import carRouter from './routes/car.js';
-import rentalRouter from './routes/rental.js';
-import userRouter from './routes/user.js';
-import dotenv from 'dotenv';
+import { ValidationError } from 'express-validation';
+import config from './config.js'
 
+import UserController from './user/controller.js';
+const userController = new UserController();
+import BrandController from './brand/controller.js';
+const brandController = new BrandController();
+import CategoryController from './category/controller.js';
+const categoryController = new CategoryController();
+import CarController from './car/controller.js';
+const carController = new CarController();
+import RentalController from './rental/controller.js';
+const rentalController = new RentalController();
 
 const app = express();
-
 const { json } = pkg;
-
 app.use(json());
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -24,30 +28,27 @@ app.use((req, res, next) => {
   next();
 });
 
-
-app.use('/brand',brandRouter);
-app.use('/category',categoryRouter);
-app.use('/car',carRouter);
-app.use('/rental',rentalRouter);
-app.use('/user',userRouter);
+app.use(brandController.router);
+app.use(categoryController.router);
+app.use(carController.router);
+app.use(rentalController.router);
+app.use(userController.router);
 
 app.use((error, req, res, next) => {
-  const status = error.statusCode || 500;
-  const { message } = error;
-  const { data } = error;
-  res.status(status).json({ message, data });
+  if (error instanceof ValidationError) {
+    res.status(400).send({ error });
+  }
+  else {
+    const { message, statusCode=500 } = error;
+    res.status(statusCode).send({ statusCode, message });
+  }
 });
 
-dotenv.config();
-let host = process.env.HOST;
-
 try {
-  await mongoose.connect(host , { useNewUrlParser: true, useUnifiedTopology: true }, );
+  await mongoose.connect(config.uri, { useNewUrlParser: true, useUnifiedTopology: true },);
   console.log("DB Start !!!")
-  app.listen(8080);
-
+  app.listen(config.port);
 } catch (error) {
-  
   console.log(error);
 }
 
