@@ -114,8 +114,10 @@ class rental {
         return await aray;
     }
 
-    async getCurrentRentalWhitfilter(query) {
-        const { startDate, endDate, carTitle,name } = query;
+    async getCurrentRentalWhitfilter(body, query) {
+        const { startDate, endDate, carTitle, name } = query;
+        const { page = 1 } = body;
+        const nbOfElementPage = 3;
         let datetMatch = {};
         if (startDate && endDate) {
             console.log('jkjk')
@@ -126,24 +128,23 @@ class rental {
         if (carTitle) {
             carTitleMatch['car.title'] = carTitle;
         }
-        let nameMatch = {};
+        let firstNameMatch = {};
+        let lastNameMatch = {}
         if (name) {
-            nameMatch['userFirstName'] = { $regex: '/'+name+'/i' };
-            
+            const nameExpression = new RegExp(name, "i");
+            firstNameMatch['userFirstName'] = { $regex: nameExpression };
+            lastNameMatch['userLastName'] = { $regex: nameExpression };
         }
-        console.log(nameMatch)
-
         const array = Rental.aggregate([
             { $match: datetMatch },
-            { $match: nameMatch },
+            { $match: { $or: [firstNameMatch, lastNameMatch] } },
             { $lookup: { from: "cars", localField: "Car", foreignField: "_id", as: "car" } },
             { $unwind: "$car" },
             { $match: carTitleMatch },
             { $sort: { startDate: 1 } },
-            { $skip: 0 },
-            { $limit: 7 },
+            { $skip: (page - 1) * nbOfElementPage },
+            { $limit: nbOfElementPage },
         ]);
-        console.log('hiii')
         return await array
     }
 

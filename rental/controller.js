@@ -19,7 +19,7 @@ class Controller {
         this.router.put(this.path + '/:rentalId', validate(Validation.updateRental(), {}, {}), Controller.updateRental);
         this.router.delete(this.path + '/:rentalId', Controller.deleteRental);
         this.router.get(this.path + '/getRentalgroupByCar', Controller.getRentalgroupByCar);
-        this.router.get(this.path + '/getCurrentRentalByName', Controller.getCurrentRentalByName);
+        this.router.get(this.path + '/getCurrentRentalByName',validate(Validation.getCurrentRentalByname(),{},{}) ,Controller.getCurrentRentalByName);
         this.router.get(this.path + '/getCurrentRentalWhitfilter', Controller.getCurrentRentalWhitfilter);
 
     }
@@ -70,7 +70,7 @@ class Controller {
 
     static async getCurrentRentalWhitfilter(req, res, next) {
         try {
-            const aray = await service.getCurrentRentalWhitfilter(req.query);
+            const aray = await service.getCurrentRentalWhitfilter(req.body, req.query);
             res.status(200).send(aray);
         } catch (error) {
             next(new RentalException(error.statusCode, error.message))
