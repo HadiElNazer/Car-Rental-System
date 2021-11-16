@@ -10,14 +10,15 @@ export default (req, res, next) => {
     }
     const token = authHeader;
     let decodedToken;
-    decodedToken = jwt.verify(token,config.secret );
+    decodedToken = jwt.verify(token, config.secret);
     if (!decodedToken) {
       const error = new Error('Not authenticated.');
       throw error;
     }
     req.userId = decodedToken.userId;
     next();
-  } catch (e) {
+  }
+  catch (e) {
     e.statusCode = 401;
     next(e);
   }

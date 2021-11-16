@@ -24,6 +24,13 @@ export default {
             en:"this date is used  "
             
         }
+    },
+    notFoundCar:{
+        message:{
+            ar:"هذه السيارة غير موجودة",
+            en:"this car is not found  "
+            
+        }
     }
 
 }

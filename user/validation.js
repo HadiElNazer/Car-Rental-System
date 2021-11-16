@@ -1,4 +1,4 @@
-import { Joi } from 'express-validation';
+import Joi from 'joi-oid';
 
 class Validation {
 

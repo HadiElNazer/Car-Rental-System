@@ -10,9 +10,7 @@ class rental {
         const { carId, userFirstName, userLastName, startDate, endDate, userMobileNumber } = body;
         const car = await Car.findById(carId);
         if (!car) {
-            const error = new Error('Could not find car.');
-            error.statusCode = 404;
-            throw error;
+            throw new RentalException(404, 'notFoundCar')
         }
         await this.isConflict(null, carId, startDate, endDate);
         const rental = new Rental({
@@ -41,23 +39,23 @@ class rental {
     }
 
     async isConflict(rentalId, carId, startDate, endDate) {
-        if (new Date(endDate) <= new Date(startDate)) {
+        const startDat = new Date(startDate);
+        const endDat = new Date(endDate);
+        if (endDat <= startDat) {
             throw new RentalException(400, 'validationDate')
         }
-        const b = await Rental.aggregate([
-            { $match: { Car: mongoose.Types.ObjectId(carId), } },
-            { $match: { _id: { $ne: mongoose.Types.ObjectId(rentalId) } } },
-            {
-                $match: {
-                    $or: [
-                        { $and: [{ startDate: { $lte: new Date(startDate) } }, { endDate: { $gte: new Date(startDate) } }] },
-                        { $and: [{ startDate: { $lte: new Date(endDate) } }, { endDate: { $gte: new Date(endDate) } }] },
-                        { $and: [{ startDate: { $gte: new Date(startDate) } }, { endDate: { $lte: new Date(endDate) } }] }
-                    ]
-                }
-            }
-        ]);
-        if (b.length !== 0) {
+        const catMatch = {};
+        catMatch['Car'] = mongoose.Types.ObjectId(carId);
+        if (rentalId !== null) {
+            catMatch['_id'] = { $ne: mongoose.Types.ObjectId(rentalId) };
+        }
+        catMatch['$or'] = [
+            { $and: [{ startDate: { $lte: startDat } }, { endDate: { $gte: startDat } }] },
+            { $and: [{ startDate: { $lte: endDat } }, { endDate: { $gte: endDat } }] },
+            { $and: [{ startDate: { $gte: startDat } }, { endDate: { $lte: endDat } }] }
+        ];
+        const rental = await Rental.aggregate([{ $match: catMatch },]);
+        if (rental.length !== 0) {
             throw new RentalException(400, 'validationDateConflig')
         }
     }
@@ -76,6 +74,7 @@ class rental {
     }
 
     async getRentalgroupByCar() {
+        const dateNow = new Date();
         const aray = await Rental.aggregate([
             { $lookup: { from: "cars", localField: "Car", foreignField: "_id", as: "car" } },
             { $unwind: "$car" },
@@ -105,7 +104,7 @@ class rental {
                         $filter: {
                             input: "$list",
                             as: "x",
-                            cond: { $and: [{ $lte: ["$$x.startDate", new Date()] }, { $gte: ["$$x.endDate", new Date()] }] }
+                            cond: { $and: [{ $lte: ["$$x.startDate", dateNow] }, { $gte: ["$$x.endDate", dateNow] }] }
                         }
                     }
                 }
@@ -115,32 +114,30 @@ class rental {
     }
 
     async getCurrentRentalWhitfilter(body, query) {
-        const { startDate, endDate, carTitle, name } = query;
-        const { page = 1 } = body;
-        const nbOfElementPage = 3;
-        let datetMatch = {};
+        const { startDate, endDate, carTitle, nameUser } = query;
+        const { page = 1, nbOfElementPage } = body;
+        const dateNow = new Date();
+        const currentRental = { startDate: { $lte: dateNow }, endDate: { $gte: dateNow }, };
+
+        let optionalMatch = {};
         if (startDate && endDate) {
-            console.log('jkjk')
-            datetMatch['startDate'] = new Date(startDate);
-            datetMatch['endDate'] = new Date(endDate);
+            optionalMatch['startDate'] = new Date(startDate);
+            optionalMatch['endDate'] = new Date(endDate);
         }
-        let carTitleMatch = {};
         if (carTitle) {
-            carTitleMatch['car.title'] = carTitle;
+            optionalMatch['car.title'] = carTitle;
         }
-        let firstNameMatch = {};
-        let lastNameMatch = {}
-        if (name) {
-            const nameExpression = new RegExp(name, "i");
-            firstNameMatch['userFirstName'] = { $regex: nameExpression };
-            lastNameMatch['userLastName'] = { $regex: nameExpression };
+        if (nameUser) {
+            const nameExpression = new RegExp(nameUser, "i");
+            const firstNameMatch = { userFirstName: { $regex: nameExpression } };
+            const lastNameMatch = { userLastName: { $regex: nameExpression } };
+            optionalMatch['$or'] = [firstNameMatch, lastNameMatch];
         }
         const array = Rental.aggregate([
-            { $match: datetMatch },
-            { $match: { $or: [firstNameMatch, lastNameMatch] } },
+            { $match: currentRental },
             { $lookup: { from: "cars", localField: "Car", foreignField: "_id", as: "car" } },
             { $unwind: "$car" },
-            { $match: carTitleMatch },
+            { $match: optionalMatch },
             { $sort: { startDate: 1 } },
             { $skip: (page - 1) * nbOfElementPage },
             { $limit: nbOfElementPage },
@@ -150,6 +147,8 @@ class rental {
 
     async getCurrentRentalByName(query) {
         const { cars } = query;
+        const dateNow = new Date();
+        const currentRental = { startDate: { $lte: dateNow }, endDate: { $gte: dateNow } };
         const list = cars.split(',');
         const arrayMatch = [];
         for (const index in list) {
@@ -158,7 +157,7 @@ class rental {
             arrayMatch.push(elemMatch);
         }
         const arrayRental = await Rental.aggregate(
-            [{ $match: { $and: [{ startDate: { $lte: new Date() } }, { endDate: { $gte: new Date() } }] } },
+            [{ $match: currentRental },
             { $lookup: { from: "cars", localField: "Car", foreignField: "_id", as: "car" } },
             { $unwind: "$car" },
             { $match: { $or: arrayMatch } }

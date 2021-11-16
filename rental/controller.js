@@ -14,14 +14,13 @@ class Controller {
     }
 
     initializeroutes() {
-        //this.router.use(this.path, isAuth);
+        this.router.use(this.path, isAuth);
         this.router.post(this.path + '/', validate(Validation.addRental(), {}, {}), Controller.addRental);
         this.router.put(this.path + '/:rentalId', validate(Validation.updateRental(), {}, {}), Controller.updateRental);
-        this.router.delete(this.path + '/:rentalId', Controller.deleteRental);
+        this.router.delete(this.path + '/:rentalId',validate(Validation.deleteRental(),{},{}), Controller.deleteRental);
         this.router.get(this.path + '/getRentalgroupByCar', Controller.getRentalgroupByCar);
-        this.router.get(this.path + '/getCurrentRentalByName',validate(Validation.getCurrentRentalByname(),{},{}) ,Controller.getCurrentRentalByName);
-        this.router.get(this.path + '/getCurrentRentalWhitfilter', Controller.getCurrentRentalWhitfilter);
-
+        this.router.get(this.path + '/getCurrentRentalByName', validate(Validation.getCurrentRentalByname(), {}, {}), Controller.getCurrentRentalByName);
+        this.router.get(this.path + '/getCurrentRentalWhitfilter', validate(Validation.getCurrentRentalWhithFilter(), {}, {}), Controller.getCurrentRentalWhitfilter);
     }
 
     static async addRental(req, res, next) {
@@ -32,7 +31,7 @@ class Controller {
             next(new RentalException(err.statusCode, err.message));
         }
     }
-
+    
     static async updateRental(req, res, next) {
         try {
             await service.updateRental(req.body, req.params);
@@ -41,6 +40,7 @@ class Controller {
             next(new RentalException(err.statusCode, err.message));
         }
     }
+
     static async deleteRental(req, res, next) {
         try {
             await service.deleteRental(req.params);
@@ -76,9 +76,6 @@ class Controller {
             next(new RentalException(error.statusCode, error.message))
         }
     }
-
-
-
 
 }
 export default Controller;

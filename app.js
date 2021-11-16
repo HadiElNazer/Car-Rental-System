@@ -39,7 +39,7 @@ app.use((error, req, res, next) => {
     res.status(400).send({ error });
   }
   else {
-    const { message, statusCode=500 } = error;
+    const { message, statusCode = 500 } = error;
     res.status(statusCode).send({ statusCode, message });
   }
 });
