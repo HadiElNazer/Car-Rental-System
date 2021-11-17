@@ -6,6 +6,18 @@ export default
                 en: "Could not find car"
             }
         },
+        notFoundBrand: {
+            message: {
+                ar: "لم يتم العثور على الماركة",
+                en: "Could not find brand"
+            }
+        },
+        notFoundCategory: {
+            message: {
+                ar: "لم يتم العثور على النوعية",
+                en: "Could not find category"
+            }
+        },
         rentalRelationCar: {
             message: {
                 ar: "لا يمكنك حذف السيارة لانها على صلة مع الايجار",

@@ -17,10 +17,35 @@ class Validation {
 
     static updateCar() {
         const schema = {
+            params: Joi.object({
+                carId: Joi.objectId().required()
+            })
+            ,
             body: Joi.object({
                 title: Joi.string().required().min(1),
                 description: Joi.string().required().min(1),
                 image: Joi.string().required().min(1)
+            })
+        }
+        return schema;
+    }
+
+    static deleteCar() {
+        const schema = {
+            params: Joi.object({
+                carId: Joi.objectId().required()
+            })
+        }
+        return schema;
+    }
+
+    static getCarByBrand() {
+        const schema = {
+            body: Joi.object({
+                brandId: Joi.objectId().required()
+            }),
+            query: Joi.object({
+                categoryName: Joi.string().required()
             })
         }
         return schema;

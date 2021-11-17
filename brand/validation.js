@@ -13,8 +13,11 @@ class Validation {
         return schema;
     }
 
-    static updateBrand () {
+    static updateBrand() {
         const schema = {
+            params: Joi.object({
+                brandId: Joi.objectId().required()
+            }),
             body: Joi.object({
                 name: Joi.string().min(3),
                 description: Joi.string().min(3),
@@ -23,6 +26,25 @@ class Validation {
         }
         return schema;
     }
+
+    static deleteBrand() {
+        const schema = {
+            params: Joi.object({
+                brandId: Joi.objectId().required()
+            }),
+        }
+        return schema;
+    }
+
+    static findBrand() {
+        const schema = {
+            body: Joi.object({
+                brandId: Joi.objectId().required()
+            }),
+        }
+        return schema;
+    }
+
 }
 
 export default Validation;

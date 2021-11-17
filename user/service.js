@@ -14,7 +14,6 @@ const transporter = createTransport(
     }),
 );
 
-
 class user {
 
     async signup(body) {
@@ -56,7 +55,7 @@ class user {
                 email: user.email,
                 userId: user._id.toString(),
             },
-            config.secret,
+            config.SECRET,
             { expiresIn: '1h' },
         );
         return await ({ token, user })

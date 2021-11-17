@@ -2,6 +2,8 @@ import Rental from './model.js';
 import Car from '../car/model.js';
 import RentalException from './exception.js'
 import mongoose from 'mongoose';
+import config from './config.js';
+const { statusCode } = config;
 
 
 class rental {
@@ -10,7 +12,7 @@ class rental {
         const { carId, userFirstName, userLastName, startDate, endDate, userMobileNumber } = body;
         const car = await Car.findById(carId);
         if (!car) {
-            throw new RentalException(404, 'notFoundCar')
+            throw new RentalException(statusCode.NOTFOUND, 'notFoundCar')
         }
         await this.isConflict(null, carId, startDate, endDate);
         const rental = new Rental({
@@ -30,7 +32,7 @@ class rental {
         const { rentalId } = params;
         const rental = await Rental.findById(rentalId);
         if (!rental) {
-            throw new RentalException(404, 'notFound')
+            throw new RentalException(statusCode.NOTFOUND, 'notFound')
         }
         await this.isConflict(rentalId, rental.Car, startDate, endDate);
         await Rental.updateOne(
@@ -42,7 +44,7 @@ class rental {
         const startDat = new Date(startDate);
         const endDat = new Date(endDate);
         if (endDat <= startDat) {
-            throw new RentalException(400, 'validationDate')
+            throw new RentalException(statusCode.VALIDATION, 'validationDate')
         }
         const catMatch = {};
         catMatch['Car'] = mongoose.Types.ObjectId(carId);
@@ -56,7 +58,7 @@ class rental {
         ];
         const rental = await Rental.aggregate([{ $match: catMatch },]);
         if (rental.length !== 0) {
-            throw new RentalException(400, 'validationDateConflig')
+            throw new RentalException(statusCode.VALIDATION, 'validationDateConflig')
         }
     }
 
@@ -64,12 +66,12 @@ class rental {
         const { rentalId } = params;
         const rental = await Rental.findById(rentalId);
         if (!rental) {
-            throw new RentalException(404, 'notFound')
+            throw new RentalException(statusCode.NOTFOUND, 'notFound')
         }
         if (rental.startDate > new Date()) {
             await Rental.deleteOne({ _id: rentalId });
         } else {
-            throw new RentalException(400, 'deleteDate')
+            throw new RentalException(statusCode.VALIDATION, 'deleteDate')
         }
     }
 
@@ -80,10 +82,7 @@ class rental {
             { $unwind: "$car" },
             {
                 $group: {
-                    _id: "$car._id",
-                    car: { $first: "$car" },
-                    numberOfRental: { $sum: 1 },
-                    list: {
+                    _id: "$car._id", car: { $first: "$car" }, numberOfRental: { $sum: 1 }, list: {
                         $addToSet: {
                             rentalId: "$_id",
                             userLastName: "$userLastName",
@@ -97,10 +96,7 @@ class rental {
             },
             {
                 $project: {
-                    _id: 0,
-                    car: 1,
-                    numberOfRental: 1,
-                    current: {
+                    _id: 0, car: 1, numberOfRental: 1, current: {
                         $filter: {
                             input: "$list",
                             as: "x",
@@ -118,7 +114,6 @@ class rental {
         const { page = 1, nbOfElementPage } = body;
         const dateNow = new Date();
         const currentRental = { startDate: { $lte: dateNow }, endDate: { $gte: dateNow }, };
-
         let optionalMatch = {};
         if (startDate && endDate) {
             optionalMatch['startDate'] = new Date(startDate);

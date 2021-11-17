@@ -45,9 +45,9 @@ app.use((error, req, res, next) => {
 });
 
 try {
-  await mongoose.connect(config.uri, { useNewUrlParser: true, useUnifiedTopology: true },);
+  await mongoose.connect(config.URI, { useNewUrlParser: true, useUnifiedTopology: true },);
   console.log("DB Start !!!")
-  app.listen(config.port);
+  app.listen(config.PORT);
 } catch (error) {
   console.log(error);
 }

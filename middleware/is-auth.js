@@ -10,7 +10,7 @@ export default (req, res, next) => {
     }
     const token = authHeader;
     let decodedToken;
-    decodedToken = jwt.verify(token, config.secret);
+    decodedToken = jwt.verify(token, config.SECRET);
     if (!decodedToken) {
       const error = new Error('Not authenticated.');
       throw error;

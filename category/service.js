@@ -1,6 +1,8 @@
 import Category from './model.js'; //eslint-disable-line
 import Car from '../car/model.js';
 import CategoryException from './exception.js'
+import config from './config.js';
+const { statusCode } = config;
 
 class category {
 
@@ -22,7 +24,7 @@ class category {
         const { description, name } = body;
         const category = await Category.findById(categoryId);
         if (!category) {
-           throw new CategoryException(404,'notFound');
+           throw new CategoryException(statusCode.NOTFOUND,'notFound');
         }
         const date = new Date();
         await Category.updateOne(
@@ -35,7 +37,7 @@ class category {
         const { categoryId } = body;
         const category = await Category.findById(categoryId);
         if (!category) {
-           throw new CategoryException(404,'notFound')
+           throw new CategoryException(statusCode.NOTFOUND,'notFound')
         }
         return await category;
     }
@@ -49,13 +51,13 @@ class category {
         const { categoryId } = params;
         const category = await Category.findById(categoryId);
         if (!category) {
-            throw new CategoryException(404,'notFound')
+            throw new CategoryException(statusCode.NOTFOUND,'notFound')
         }
         const car = await Car.findOne({ Category: categoryId });
         if (!car) {
             await Category.deleteOne({ _id: categoryId });
         } else {
-           throw new CategoryException(460,'brandRelationCar')
+           throw new CategoryException(statusCode.RELATION,'brandRelationCar')
         }
     }
 

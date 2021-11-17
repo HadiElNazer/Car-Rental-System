@@ -4,6 +4,8 @@ import Validation from './validation.js';
 import CategoryException from './exception.js'
 import CategoryService from './service.js';
 const service = new CategoryService();
+import config from './config.js';
+const { statusCode } = config;
 
 class Controller {
     constructor() {
@@ -15,7 +17,7 @@ class Controller {
     initializeroutes() {
         this.router.post(this.path + '/', validate(Validation.addCategory(), {}, {}), Controller.addCategory);
         this.router.put(this.path + '/:categoryId', validate(Validation.updateCategory(), {}, {}), Controller.updateCategory);
-        this.router.delete(this.path + '/:categoryId', Controller.deleteCategory);
+        this.router.delete(this.path + '/:categoryId', validate(Validation.deleteCategory(), {}, {}), Controller.deleteCategory);
         this.router.get(this.path + '/', Controller.findCategory);
         this.router.get(this.path + '/findAll', Controller.findAllCategory);
     }
@@ -23,7 +25,7 @@ class Controller {
     static async addCategory(req, res, next) {
         try {
             const result = await service.addCategory(req.body);
-            res.status(200).send({ message: 'Category created!', result });
+            res.status(statusCode.ACCEPT).send({ message: 'Category created!', result });
         } catch (err) {
             next(new CategoryException(err.statusCode, err.message))
         }
@@ -32,7 +34,7 @@ class Controller {
     static async updateCategory(req, res, next) {
         try {
             await service.updateCategory(req.body, req.params);
-            res.status(200).send({ message: 'category updated!' });
+            res.status(statusCode.ACCEPT).send({ message: 'category updated!' });
         } catch (err) {
             next(new CategoryException(err.statusCode, err.message))
         }
@@ -41,7 +43,7 @@ class Controller {
     static async deleteCategory(req, res, next) {
         try {
             await service.deleteCategory(req.params);
-            res.status(200).send({ message: 'category deleted.' });
+            res.status(statusCode.ACCEPT).send({ message: 'category deleted.' });
         }
         catch (err) {
             next(new CategoryException(err.statusCode, err.message))
@@ -51,7 +53,7 @@ class Controller {
     static async findCategory(req, res, next) {
         try {
             const category = await service.findCategory(req.body)
-            res.status(200).send({ category });
+            res.status(statusCode.ACCEPT).send({ category });
         } catch (err) {
             next(new CategoryException(err.statusCode, err.message))
         }
@@ -60,7 +62,7 @@ class Controller {
     static async findAllCategory(req, res, next) {
         try {
             const categorys = await service.findAll();
-            res.status(200).send({ categorys });
+            res.status(statusCode.ACCEPT).send({ categorys });
         }
         catch (err) {
             next(new CategoryException(err.statusCode, err.message))

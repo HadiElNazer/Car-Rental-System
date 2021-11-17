@@ -6,6 +6,8 @@ import Rental from '../rental/model.js';
 import CarException from './exception.js';
 import BrandException from '../brand/exception.js'
 import CategoryException from '../category/exception.js'
+import config from './config.js';
+const { statusCode } = config;
 
 
 class car {
@@ -14,11 +16,11 @@ class car {
         const { title, description, image, brandId, categoryId } = body;
         const brand = await Brand.findById(brandId);
         if (!brand) {
-            throw new BrandException(404,'notFound');
+            throw new BrandException(statusCode.NOTFOUND, 'notFoundBrand');
         }
         const category = await Category.findById(categoryId);
         if (!category) {
-           throw new CategoryException(404,'notFound');
+            throw new CategoryException(statusCode.NOTFOUND, 'notFoundCategory');
         }
         const car = new Car({
             title,
@@ -35,14 +37,14 @@ class car {
         const { carId } = params;
         const car = await Car.findById(carId);
         if (!car) {
-            throw new CarException(404,'notFound');
+            throw new CarException(statusCode.NOTFOUND, 'notFound');
         }
         const rental = await Rental.findOne({ Car: carId });
         if (!rental) {
             await Car.deleteOne({ _id: carId });
         }
         else {
-            throw new CarException(460,'rentalRelationCar');
+            throw new CarException(statusCode.RELATION, 'rentalRelationCar');
         }
     }
 
@@ -51,7 +53,7 @@ class car {
         const { carId } = params;
         const car = await Car.findById(carId);
         if (!car) {
-            throw new CarException(404,'notFound');
+            throw new CarException(statusCode.NOTFOUND, 'notFound');
         }
         await Car.updateOne({ _id: carId }, { $set: { title, description, image } })
     }

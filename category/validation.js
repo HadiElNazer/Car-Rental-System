@@ -5,8 +5,8 @@ class Validation {
     static addCategory() {
         const schema = {
             body: Joi.object({
-                name: Joi.string().min(3),
-                description: Joi.string().min(3),
+                name: Joi.string().min(1).required(),
+                description: Joi.string().min(1).required(),
             })
         }
         return schema;
@@ -14,9 +14,21 @@ class Validation {
 
     static updateCategory() {
         const schema = {
+            params: Joi.object({
+                categoryId: Joi.objectId().required()
+            }),
             body: Joi.object({
-                name: Joi.string().min(3).required(),
-                description: Joi.string().min(3).required()
+                name: Joi.string().min(1).required(),
+                description: Joi.string().min(1).required()
+            })
+        }
+        return schema;
+    }
+
+    static deleteCategory() {
+        const schema = {
+            params: Joi.object({
+                categoryId: Joi.objectId().required()
             })
         }
         return schema;

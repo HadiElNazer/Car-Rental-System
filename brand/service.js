@@ -1,6 +1,8 @@
 import Brand from './model.js'; //eslint-disable-line
 import Car from '../car/model.js';
 import BrandException from './exception.js'
+import config from './config.js';
+const { statusCode } = config;
 
 class brand {
 
@@ -24,7 +26,7 @@ class brand {
         const { brandId } = params;
         const brand = await Brand.findById(brandId);
         if (!brand) {
-            throw new BrandException(404, 'notFound');
+            throw new BrandException(statusCode.NOTFOUND, 'notFound');
         }
         await Brand.updateOne({ _id: brandId }, { $set: { name, description, showNbCars, updatedAt: date } });
     }
@@ -33,7 +35,7 @@ class brand {
         const { brandId } = body;
         const brand = await Brand.findById(brandId);
         if (!brand) {
-            throw new BrandException(404, 'notFound');
+            throw new BrandException(statusCode.NOTFOUND, 'notFound');
         }
         return await brand;
     }
@@ -47,14 +49,14 @@ class brand {
         const { brandId } = params;
         const brand = await Brand.findById(brandId);
         if (!brand) {
-            throw new BrandException(404, 'notFound');
+            throw new BrandException(statusCode.NOTFOUND, 'notFound');
         }
         const car = await Car.findOne({ Brand: brandId });
         if (!car) {
             const brands = await Brand.deleteOne({ _id: brandId });
         }
         else {
-            throw new BrandException(460, 'brandRelationCar')
+            throw new BrandException(statusCode.RELATION, 'brandRelationCar')
         }
     }
 }
