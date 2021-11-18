@@ -77,6 +77,7 @@ class rental {
 
     async getRentalgroupByCar() {
         const dateNow = new Date();
+        dateNow.setHours(dateNow.getHours() + 2);
         const aray = await Rental.aggregate([
             { $lookup: { from: "cars", localField: "Car", foreignField: "_id", as: "car" } },
             { $unwind: "$car" },
@@ -113,6 +114,7 @@ class rental {
         const { startDate, endDate, carTitle, nameUser } = query;
         const { page = 1, nbOfElementPage } = body;
         const dateNow = new Date();
+        dateNow.setHours(dateNow.getHours() + 2);
         const currentRental = { startDate: { $lte: dateNow }, endDate: { $gte: dateNow }, };
         let optionalMatch = {};
         if (startDate && endDate) {
@@ -143,6 +145,7 @@ class rental {
     async getCurrentRentalByName(query) {
         const { cars } = query;
         const dateNow = new Date();
+        dateNow.setHours(dateNow.getHours() + 2);
         const currentRental = { startDate: { $lte: dateNow }, endDate: { $gte: dateNow } };
         const list = cars.split(',');
         const arrayMatch = [];
