@@ -8,8 +8,8 @@ class Validation {
                 title: Joi.string().required().min(1),
                 description: Joi.string().required().min(1),
                 image: Joi.string().required().min(1),
-                categoryId: Joi.string(),
-                brandId: Joi.string()
+                categoryId: Joi.objectId().required(),
+                brandId: Joi.objectId().required(),
             })
         }
         return schema;
@@ -45,7 +45,7 @@ class Validation {
                 brandId: Joi.objectId().required()
             }),
             query: Joi.object({
-                categoryName: Joi.string().required()
+                categoryName: Joi.string()
             })
         }
         return schema;

@@ -5,9 +5,9 @@ class Validation {
     static signup() {
         const schema = {
             body: Joi.object({
-                name: Joi.string().min(3).required(),
+                name: Joi.string().min(1).required(),
                 email: Joi.string().email().required(),
-                password: Joi.string().min(4).required()
+                password: Joi.string().min(1).required()
             })
         }
         return schema;

@@ -19,8 +19,8 @@ class rental {
             userFirstName,
             userLastName,
             Car: carId,
-            startDate,
-            endDate,
+            startDate: new Date(startDate),
+            endDate: new Date(endDate),
             userMobileNumber
         });
         const result = await rental.save();
@@ -37,7 +37,7 @@ class rental {
         await this.isConflict(rentalId, rental.Car, startDate, endDate);
         await Rental.updateOne(
             { _id: rentalId },
-            { $set: { userFirstName, userLastName, startDate, endDate, userMobileNumber, } })
+            { $set: { userFirstName, userLastName, startDate: new Date(startDate), endDate: new Date(endDate), userMobileNumber, } })
     }
 
     async isConflict(rentalId, carId, startDate, endDate) {
